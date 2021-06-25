@@ -1,20 +1,40 @@
 import * as Joi from "joi";
+import { promises as fs } from "fs";
 import { createClient } from "../helpers";
-import { Operation } from "./base";
+import { Operation } from "./base"; 
 
-const InputSchema = Joi.object({
+const BaseInputSchema = Joi.object({
   operation: Joi.string().lowercase().valid("update").required(),
   region: Joi.string().lowercase().required(),
   table: Joi.string().required(),
-  key: Joi.object().pattern(/./, Joi.alternatives().try(Joi.string(), Joi.number())).min(1).max(2).required(),
-}).required();
+  updateExpression: Joi.string().required()
+});
 
-export interface UpdateOperationInput {
+const InputSchema = Joi.alternatives([
+  BaseInputSchema.append({
+    expressionAttributeValues: Joi.string().required(),
+    key: Joi.object().required(),
+  }),
+  BaseInputSchema.append({
+    expressionAttributeFiles: Joi.string().required(),
+    key: Joi.object().required(),
+  }),
+]).required();
+
+export type UpdateOperationInput = {
   operation: "update";
   region: string;
   table: string;
-  key: { [key: string]: string | number };
-}
+  updateExpression: string;
+} & ({
+  expressionAttributeValues: string;
+  expressionAttributeFiles?: never;
+  key: { [key: string]: any };
+} | {
+  expressionAttributeValues?: never;
+  expressionAttributeFiles: string;
+  key: { [key: string]: any };
+});
 
 export class UpdateOperation implements Operation<UpdateOperationInput> {
   public readonly name = "update";
@@ -32,9 +52,21 @@ export class UpdateOperation implements Operation<UpdateOperationInput> {
 
   public async execute(input: UpdateOperationInput) {
     const ddb = createClient(input.region);
+    const item = input.expressionAttributeValues || await this.read(input.expressionAttributeFiles!);
+    
     await ddb.update({
       TableName: input.table,
       Key: input.key,
+      UpdateExpression: `set ${input.updateExpression} = :${input.updateExpression}`,
+      ExpressionAttributeValues: {
+        [`:${input.updateExpression}`]:`${item}`
+      }
     }).promise();
+  }
+
+  private async read(path: string) {
+    const content = await fs.readFile(path, { encoding: "utf8" });
+
+    return JSON.parse(content);
   }
 }
