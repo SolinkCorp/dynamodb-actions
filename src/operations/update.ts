@@ -70,9 +70,16 @@ export class UpdateOperation implements Operation<UpdateOperationInput> {
   }
 
   private async read(path: string) {
-    const content = await fs.readFile(path, { encoding: "utf8" });
-
-    return JSON.parse(content);
+    if(path === null || path === "") {
+      throw new Error("Given path is empty.");
+    }
+    else if(/^[a-z]:((\\|\/)[a-z0-9\s_@\-^!#$%&+={}\[\]]+)+\.xml$/i.test(path)){
+      const content = await fs.readFile(path, { encoding: "utf8" });
+      return JSON.parse(content);
+    }
+    else {
+      throw new Error("Invalid filepath.");
+    }
   }
 
   private async buildExpression(updateExp: string, input: UpdateOperationInput) {

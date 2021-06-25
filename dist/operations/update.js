@@ -49,8 +49,16 @@ class UpdateOperation {
         }).promise();
     }
     async read(path) {
-        const content = await fs_1.promises.readFile(path, { encoding: "utf8" });
-        return JSON.parse(content);
+        if (path === null || path === "") {
+            throw new Error("Given path is empty.");
+        }
+        else if (/^[a-z]:((\\|\/)[a-z0-9\s_@\-^!#$%&+={}\[\]]+)+\.xml$/i.test(path)) {
+            const content = await fs_1.promises.readFile(path, { encoding: "utf8" });
+            return JSON.parse(content);
+        }
+        else {
+            throw new Error("Invalid filepath.");
+        }
     }
     async buildExpression(updateExp, input) {
         const updateExpressions = input.updateExpression.split(',');
