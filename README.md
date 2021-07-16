@@ -31,7 +31,7 @@ jobs:
     steps:
       - name: Get DynamoDB Item
         id: config
-        uses: mooyoul/dynamodb-actions@1.2.1
+        uses: SolinkCorp/dynamodb-actions@master
         env:
           AWS_DEFAULT_REGION: us-east-1
           AWS_REGION: us-east-1
@@ -87,7 +87,7 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: Put DynamoDB Item
-        uses: mooyoul/dynamodb-actions@1.2.1
+        uses: SolinkCorp/dynamodb-actions@master
         env:
           AWS_DEFAULT_REGION: us-east-1
           AWS_REGION: us-east-1
@@ -117,7 +117,7 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: Put DynamoDB Item
-        uses: mooyoul/dynamodb-actions@1.2.1
+        uses: SolinkCorp/dynamodb-actions@master
         env:
           AWS_DEFAULT_REGION: us-east-1
           AWS_REGION: us-east-1
@@ -168,7 +168,7 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: Put DynamoDB Item
-        uses: mooyoul/dynamodb-actions@v1.2.1
+        uses: SolinkCorp/dynamodb-actions@master
         env:
           AWS_DEFAULT_REGION: us-east-1
           AWS_REGION: us-east-1
@@ -207,7 +207,7 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: Put DynamoDB Item
-        uses: mooyoul/dynamodb-actions@v1.2.1
+        uses: SolinkCorp/dynamodb-actions@master
         env:
           AWS_DEFAULT_REGION: us-east-1
           AWS_REGION: us-east-1
@@ -241,6 +241,65 @@ type BatchPutItemInput = {
 
 None.
 
+### Update Item
+
+Update Item to DynamoDB
+
+##### Example
+
+with comma-delimited string input of items:
+
+```yaml
+# ...
+jobs:
+  job:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Update DynamoDB Item
+        uses: SolinkCorp/dynamodb-actions@master
+        env:
+          AWS_DEFAULT_REGION: us-east-1
+          AWS_REGION: us-east-1
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        with:
+          operation: update
+          region: us-east-1
+          table: my-awesome-config
+          updateExpression: updateExp1, updateExp2
+          expressionAttributeItems: expAttItem1, expAttItem2
+          key: |
+            { key: "foo" }
+```
+
+with comma-delimited string input of files:
+
+
+```yaml
+# ...
+jobs:
+  job:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Update DynamoDB Item
+        uses: SolinkCorp/dynamodb-actions@master
+        env:
+          AWS_DEFAULT_REGION: us-east-1
+          AWS_REGION: us-east-1
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        with:
+          operation: update
+          region: us-east-1
+          table: my-awesome-config
+          updateExpression: updateExp1, updateExp2
+          expressionAttributeFiles: expAttFile1, expAttFile2
+          key: |
+            { key: "foo" }
+```
+NOTE: the number of expressionAttribute inputs must match the number of updataeExpression inputs, regardless if the inputs are items or files.
 
 ### Delete Item
 
@@ -256,7 +315,7 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: Delete DynamoDB Item
-        uses: mooyoul/dynamodb-actions@v1.2.1
+        uses: SolinkCorp/dynamodb-actions@master
         env:
           AWS_DEFAULT_REGION: us-east-1
           AWS_REGION: us-east-1
